@@ -4,7 +4,7 @@ var uuid = require('node-uuid');
 var _ = require('lodash');
 var tv4 = require('tv4');
 
-var models = require('../../models');
+var models = require('../models');
 var roles = require('../roles');
 var errors = require('../app/app.errors');
 var util = require('../app/app.util');

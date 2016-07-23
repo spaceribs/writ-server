@@ -1,7 +1,7 @@
 'use strict';
 
 var jsf = require('json-schema-faker');
-var models = require('../../models');
+var models = require('../models');
 var supertest = require('supertest');
 var mocks = require('../app/app.mock');
 var util = require('../../test/util');

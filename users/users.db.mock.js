@@ -1,7 +1,7 @@
 'use strict';
 
-var Database = require('../../db');
-var models = require('../../models');
+var Database = require('../db');
+var models = require('../models');
 var jsf = require('json-schema-faker');
 var uuid = require('node-uuid');
 var util = require('../app/app.util');

@@ -1,7 +1,7 @@
 'use strict';
 
 var jsf = require('json-schema-faker');
-var models = require('../../models');
+var models = require('../models');
 var _ = require('lodash');
 
 describe('App Unit Tests', function() {

@@ -1,7 +1,7 @@
 'use strict';
 
-var Database = require('../../db');
-var models = require('../../models');
+var Database = require('../db');
+var models = require('../models');
 var memdown = require('memdown');
 var jsf = require('json-schema-faker');
 

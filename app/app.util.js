@@ -2,7 +2,7 @@
 
 var secureRandom = require('secure-random');
 var hmac = require('crypto-js/hmac-sha512');
-var models = require('../../models');
+var models = require('../models');
 
 /**
  * Transforms a request body password to a salt/hash.
