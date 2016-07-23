@@ -2,10 +2,13 @@
     "name": "writ.game.server",
     "version": "0.0.2",
     "description": "The server package for writ.",
-    "repository": "https://github.com/spaceribs/writ-server",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/spaceribs/writ-server"
+    },
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "istanbul cover test -x='**/*.unit.js, **/*.e2e.js'"
     },
     "author": "spaceribs <spaceribs@gmail.com>",
     "license": "MIT",
