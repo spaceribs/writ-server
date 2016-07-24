@@ -4,7 +4,7 @@ node_js:
   - "4"
 addons:
     code_climate:
-        repo_token: 103972d7659b430d7bdb7a0295b12ad4040aaf238f483dcbc9ba92ca786de05d
+        repo_token: f620f3a2c602bd6e6835b00bd35dfcba95dc6b4194a8ed106d1d87d62c196139
 before_install:
   - "npm install node-gyp -g"
   - "npm install eslint -g"
