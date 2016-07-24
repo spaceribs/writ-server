@@ -1,0 +1,15 @@
+{
+    "spec_dir": "./",
+    "spec_files": [
+        "/app/**/**.unit.js",
+        "/middleware/**/**.unit.js",
+        "/passages/**/**.unit.js",
+        "/passages/**/**.e2e.js",
+        "/places/**/**.unit.js",
+        "/places/**/**.e2e.js",
+        "/users/**/**.unit.js",
+        "/users/**/**.e2e.js"
+    ],
+    "stopSpecOnExpectationFailure": false,
+    "random": true
+}

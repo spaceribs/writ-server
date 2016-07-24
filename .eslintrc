@@ -16,14 +16,14 @@
             2,
             "always"
         ],
-        "require-jsdoc": ["error", {
+        "require-jsdoc": [2, {
             "require": {
                 "FunctionDeclaration": true,
                 "MethodDefinition": true,
                 "ClassDeclaration": false
             }
         }],
-        "valid-jsdoc": ["error", {
+        "valid-jsdoc": [2, {
             "prefer": {
                 "arg": "param",
                 "argument": "param",

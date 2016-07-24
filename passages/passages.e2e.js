@@ -4,7 +4,7 @@ var jsf = require('json-schema-faker');
 var models = require('../models');
 var mocks = require('../app/app.mock');
 var supertest = require('supertest');
-var util = require('../../test/util');
+var util = require('../test/util');
 
 var Users = require('../users/users.db.mock');
 var Places = require('../places/places.db.mock');
