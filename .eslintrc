@@ -31,12 +31,6 @@
                 "return": "returns",
                 "virtual": "abstract"
             },
-            "preferType": {
-                "Boolean": "boolean",
-                "Number": "number",
-                "Object": "object",
-                "String": "string"
-            },
             "requireReturn": true,
             "requireReturnType": true,
             "requireParamDescription": true,
