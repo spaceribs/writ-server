@@ -15,11 +15,9 @@
 function SuccessMessage(message, data, links, status) {
     this.message = message;
     this.status = status || 'SUCCESS';
+    this.links = links || [];
     if (data) {
         this.data = data;
-    }
-    if (links) {
-        this.links = links;
     }
 }
 

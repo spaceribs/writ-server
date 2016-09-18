@@ -117,10 +117,17 @@ describe('Passages Endpoint', function() {
                     expect(res.body).toEqual({
                         status : 'SUCCESS',
                         message: 'Owned passages found.',
-                        data   : jasmine.any(Array)
+                        data   : jasmine.any(Array),
+                        links  : jasmine.any(Array)
                     });
                     expect(res.body.data[0].owner)
                         .toBe(users.verifiedUser._id);
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[1].rel)
+                        .toBe('author');
+                    expect(res.body.links[1].href)
+                        .toMatch(users.verifiedUser.id);
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
@@ -157,10 +164,21 @@ describe('Passages Endpoint', function() {
                     expect(res.body).toEqual({
                         status : 'SUCCESS',
                         message: 'Owned passages found.',
-                        data   : jasmine.any(Array)
+                        data   : jasmine.any(Array),
+                        links  : jasmine.any(Array)
                     });
                     expect(res.body.data[0].created)
                         .toBeDefined();
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch('/passage/');
+
+                    expect(res.body.links[1].rel)
+                        .toBe('author');
+                    expect(res.body.links[1].href)
+                        .toMatch(users.adminUser.id);
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
@@ -356,8 +374,30 @@ describe('Passages Endpoint', function() {
                         message: 'Created new passage.',
                         data   : {
                             id: jasmine.any(String)
-                        }
+                        },
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+
+                    expect(res.body.links[1].rel)
+                        .toBe('created');
+
+                    expect(res.body.links[2].rel)
+                        .toBe('author');
+                    expect(res.body.links[2].href)
+                        .toMatch(users.verifiedUser.id);
+
+                    expect(res.body.links[3].rel)
+                        .toBe('passage.from');
+                    expect(res.body.links[3].href)
+                        .toMatch(places.northRoom._id);
+
+                    expect(res.body.links[4].rel)
+                        .toBe('passage.to');
+                    expect(res.body.links[4].href)
+                        .toMatch(places.northWestRoom._id);
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
@@ -431,8 +471,29 @@ describe('Passages Endpoint', function() {
                     expect(res.body).toEqual({
                         message: 'Passage found.',
                         status : 'SUCCESS',
-                        data   : jasmine.any(Object)
+                        data   : jasmine.any(Object),
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(passages.northDoor.id);
+
+                    expect(res.body.links[1].rel)
+                        .toBe('author');
+                    expect(res.body.links[1].href)
+                        .toMatch(passages.northDoor.owner);
+
+                    expect(res.body.links[2].rel)
+                        .toBe('passage.from');
+                    expect(res.body.links[2].href)
+                        .toMatch(passages.northDoor.from);
+
+                    expect(res.body.links[3].rel)
+                        .toBe('passage.to');
+                    expect(res.body.links[3].href)
+                        .toMatch(passages.northDoor.to);
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
@@ -440,7 +501,7 @@ describe('Passages Endpoint', function() {
         });
 
         it('should return more information if ' +
-            'you are authenticated as an admin', function(done) {
+            'you are authenticated as an admin.', function(done) {
             supertest(app)
                 .get('/passage/' + passages.northDoor.id)
                 .auth(
@@ -452,7 +513,8 @@ describe('Passages Endpoint', function() {
                     expect(res.body).toEqual({
                         message: 'Passage found.',
                         status: 'SUCCESS',
-                        data: jasmine.any(Object)
+                        data: jasmine.any(Object),
+                        links: jasmine.any(Array)
                     });
                     expect(res.body.data.created)
                         .toBeDefined();
@@ -501,8 +563,26 @@ describe('Passages Endpoint', function() {
                     expect(res.body).toEqual({
                         status : 'SUCCESS',
                         message: 'Passage has been successfully updated.',
-                        data   : jasmine.any(Object)
+                        data   : jasmine.any(Object),
+                        links  : jasmine.any(Array)
                     });
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+
+                    expect(res.body.links[1].rel)
+                        .toBe('author');
+                    expect(res.body.links[1].href)
+                        .toMatch(users.verifiedUser.id);
+
+                    expect(res.body.links[2].rel)
+                        .toBe('passage.from');
+                    expect(res.body.links[2].href)
+                        .toMatch(passages.farNorthDoor.from);
+
+                    expect(res.body.links[3].rel)
+                        .toBe('passage.to');
+                    expect(res.body.links[3].href)
+                        .toMatch(passages.farNorthDoor.to);
                 })
                 .expect(200)
                 .end(function(err) {
@@ -570,8 +650,29 @@ describe('Passages Endpoint', function() {
                     expect(res.body).toEqual({
                         status : 'SUCCESS',
                         message: 'Passage has been successfully updated.',
-                        data   : jasmine.any(Object)
+                        data   : jasmine.any(Object),
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(passages.northEastDoor.id);
+
+                    expect(res.body.links[1].rel)
+                        .toBe('author');
+                    expect(res.body.links[1].href)
+                        .toMatch(passages.northEastDoor.owner);
+
+                    expect(res.body.links[2].rel)
+                        .toBe('passage.from');
+                    expect(res.body.links[2].href)
+                        .toMatch(passages.northEastDoor.from);
+
+                    expect(res.body.links[3].rel)
+                        .toBe('passage.to');
+                    expect(res.body.links[3].href)
+                        .toMatch(passages.northEastDoor.to);
                 })
                 .expect(200)
                 .end(function(err) {
@@ -655,7 +756,8 @@ describe('Passages Endpoint', function() {
                 .expect(function(res) {
                     expect(res.body).toEqual({
                         status : 'SUCCESS',
-                        message: 'Passage has been deleted.'
+                        message: 'Passage has been deleted.',
+                        links  : jasmine.any(Array)
                     });
                 })
                 .expect(200)

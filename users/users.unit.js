@@ -4,6 +4,7 @@ var jsf = require('json-schema-faker');
 var models = require('../models');
 var mocks = require('../app/app.mock');
 var uuid = require('node-uuid');
+var util = require('../app/app.util');
 var errors = require('../app/app.errors');
 var SuccessMessage = require('../app/app.successes').SuccessMessage;
 
@@ -44,7 +45,10 @@ describe('Users', function() {
 
             req = {
                 user: anonymousUser,
-                accepts: jasmine.createSpy('accepts')
+                accepts: jasmine.createSpy('accepts'),
+                get: function() {
+                    return 'localhost:1234';
+                }
             };
 
             res = {
@@ -52,6 +56,18 @@ describe('Users', function() {
             };
 
             callback = jasmine.createSpy('callback');
+
+            /*eslint-disable */
+            /* istanbul ignore next */
+            res.json.and.callFake(function(response) {
+                console.error('UNEXPECTED RESPONSE: \n', response);
+            });
+
+            /* istanbul ignore next */
+            callback.and.callFake(function(err) {
+                console.error('UNEXPECTED ERROR: \n', err);
+            });
+            /*eslint-enable */
 
         }
     );
@@ -86,26 +102,31 @@ describe('Users', function() {
 
         describe('usersOptions()', function() {
 
-            it('returns a json-schema when requesting options.', function() {
+            it('returns a json-schema when requesting options.', function(done) {
                 req.accepts.and.returnValue(true);
 
-                ctrl.users.options(req, res, callback);
+                res.json.and.callFake(function(response) {
+                    expect(req.accepts).toHaveBeenCalled();
+                    expect(req.accepts).toHaveBeenCalledWith('json');
+                    expect(response)
+                        .toEqual(models.io.user);
+                    done();
+                });
 
-                expect(req.accepts).toHaveBeenCalled();
-                expect(req.accepts).toHaveBeenCalledWith('json');
-                expect(res.json).toHaveBeenCalled();
-                expect(res.json.calls.mostRecent().args[0])
-                    .toEqual(models.io.user);
+                ctrl.users.options(req, res, callback);
             });
 
-            it('passes through if json isn\'t accepted.', function() {
+            it('passes through if json isn\'t accepted.', function(done) {
                 req.accepts.and.returnValue(false);
 
-                ctrl.users.options(req, res, callback);
+                callback.and.callFake(function(response) {
+                    expect(req.accepts).toHaveBeenCalled();
+                    expect(res.json).not.toHaveBeenCalled();
+                    expect(response).toBeUndefined();
+                    done();
+                });
 
-                expect(req.accepts).toHaveBeenCalled();
-                expect(res.json).not.toHaveBeenCalled();
-                expect(callback).toHaveBeenCalled();
+                ctrl.users.options(req, res, callback);
             });
 
         });
@@ -113,18 +134,25 @@ describe('Users', function() {
         describe('usersGet()', function() {
 
             it('returns the decorated profile of the current user.',
-            function() {
+            function(done) {
                 req.user = users.verifiedUser;
-                ctrl.users.get(req, res);
 
-                expect(res.json).toHaveBeenCalled();
-                expect(res.json.calls.mostRecent().args[0])
-                    .toEqual(new SuccessMessage('Your credentials are valid.', {
-                        id: users.verifiedUser.id,
-                        email: users.verifiedUser.email,
-                        name: users.verifiedUser.name,
-                        permission: users.verifiedUser.permission
-                    }));
+                res.json.and.callFake(function(response) {
+                    expect(callback).not.toHaveBeenCalled();
+                    expect(response)
+                        .toEqual(new SuccessMessage('Your credentials are valid.', {
+                            id: users.verifiedUser.id,
+                            email: users.verifiedUser.email,
+                            name: users.verifiedUser.name,
+                            permission: users.verifiedUser.permission
+                        }, [{
+                            rel: 'self',
+                            href: util.getUrl(req)
+                        }]));
+                    done();
+                });
+
+                ctrl.users.get(req, res);
             });
 
         });
@@ -144,7 +172,13 @@ describe('Users', function() {
                             'verify your account.', {
                                 id   : jasmine.any(String),
                                 email: newUser.email
-                            }));
+                            }, [{
+                                rel: 'self',
+                                href: util.getUrl(req)
+                            }, {
+                                rel: 'created',
+                                href: jasmine.any(String)
+                            }]));
                     done();
                 });
 
@@ -160,7 +194,10 @@ describe('Users', function() {
                                 email: users.verifiedUser.email,
                                 name: newUser.name,
                                 permission: 20
-                            }));
+                            }, [{
+                                rel: 'self',
+                                href: util.getUrl(req)
+                            }]));
                     done();
                 });
 
@@ -179,7 +216,10 @@ describe('Users', function() {
                                 email: newUser.email,
                                 name: users.verifiedUser.name,
                                 permission: 30
-                            }));
+                            }, [{
+                                rel: 'self',
+                                href: util.getUrl(req)
+                            }]));
                     done();
                 });
 
@@ -189,20 +229,24 @@ describe('Users', function() {
             });
 
             it('updates an existing user with a new password.', function(done) {
-                res.json.and.callFake(function() {
+                res.json.and.callFake(function(response) {
                     expect(res.json).toHaveBeenCalled();
-                    expect(res.json.calls.mostRecent().args[0])
+                    expect(response)
                         .toEqual(new SuccessMessage(
                             'User has been successfully updated.', {
                                 email: users.verifiedUser.email,
                                 name: users.verifiedUser.name,
                                 permission: 20
-                            }));
+                            }, [{
+                                rel: 'self',
+                                href: util.getUrl(req)
+                            }]));
                     done();
                 });
 
                 req.user = users.verifiedUser;
                 req.body = {password: newUser.password};
+
                 ctrl.users.post(req, res, callback);
             });
 
@@ -364,7 +408,10 @@ describe('Users', function() {
                             email: users.verifiedUser.email,
                             name: newUser.name,
                             permission: 20
-                        }));
+                        }, [{
+                            rel: 'self',
+                            href: util.getUrl(req)
+                        }]));
                     done();
 
                 });
@@ -398,7 +445,10 @@ describe('Users', function() {
                             email: newUser.email,
                             name: users.verifiedUser.name,
                             permission: 30
-                        }));
+                        }, [{
+                            rel: 'self',
+                            href: util.getUrl(req)
+                        }]));
                     done();
                 });
 
@@ -415,7 +465,10 @@ describe('Users', function() {
                             email: users.verifiedUser.email,
                             name: users.verifiedUser.name,
                             permission: 20
-                        }));
+                        }, [{
+                            rel: 'self',
+                            href: util.getUrl(req)
+                        }]));
                     done();
 
                 });
@@ -449,7 +502,10 @@ describe('Users', function() {
             it('deletes a user.', function(done) {
                 res.json.and.callFake(function(response) {
                     expect(response).toEqual(new SuccessMessage(
-                        'User has been deleted.'));
+                        'User has been deleted.', undefined, [{
+                            rel: 'self',
+                            href: util.getUrl(req)
+                        }]));
                     done();
                 });
 
@@ -462,7 +518,14 @@ describe('Users', function() {
         describe('userVerify()', function() {
 
             beforeEach(function() {
-                req = {params: {token: uuid.v4()}};
+                req = {
+                    params: {
+                        token: uuid.v4()
+                    },
+                    get: function() {
+                        return 'localhost:1234'
+                    }
+                };
             });
 
             it('returns an error if no user matches the token',
@@ -480,7 +543,13 @@ describe('Users', function() {
             it('verifies a user via an email.', function(done) {
                 res.json.and.callFake(function(response) {
                     expect(response).toEqual(new SuccessMessage(
-                        'Your email has been verified.'));
+                        'Your email has been verified.', undefined, [{
+                            rel: 'self',
+                            href: util.getUrl(req)
+                        }, {
+                            rel: 'verified',
+                            href: jasmine.any(String)
+                        }]));
                     done();
                 });
 

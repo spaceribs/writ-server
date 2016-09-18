@@ -22,8 +22,8 @@ for (var i = 0; i < models.refs.length; i++) {
  * Called when a user makes an OPTIONS request to "/passage/".
  * Returns the json-schema used to validate/update passages.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
  */
 function passagesOptions(req, res, next) {
@@ -38,8 +38,8 @@ function passagesOptions(req, res, next) {
  * Called when a user makes an GET request to "/passage/".
  * Returns the authenticated users' owned passages.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
  */
 function passagesGet(req, res, next) {
@@ -50,7 +50,7 @@ function passagesGet(req, res, next) {
                 'fields': ['owner']
             }
         }).catch(databaseErrorHandler('passages'));
-        
+
     }).then(function() {
         return Passages.find({
             selector: {
@@ -79,9 +79,15 @@ function passagesGet(req, res, next) {
         return filteredPassages;
 
     }).then(function(passages) {
-        res.json(new SuccessMessage(
-            'Owned passages found.',
-            passages)
+        res.json(
+            new SuccessMessage(
+                'Owned passages found.', passages, [{
+                    rel: 'self',
+                    href: util.getUrl(req)
+                }, {
+                    rel: 'author',
+                    href: util.getUrl(req, req.user._id)
+                }])
         );
 
     }).catch(function(err) {
@@ -95,8 +101,8 @@ function passagesGet(req, res, next) {
  * Called when a user makes an POST request to "/passage/".
  * Creates a new passage for the current user.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
  */
 function passagesPost(req, res, next) {
@@ -250,7 +256,22 @@ function passagesPost(req, res, next) {
 
         res.json(
             new SuccessMessage(
-                'Created new passage.', filtered)
+                'Created new passage.', filtered, [{
+                    rel: 'self',
+                    href: util.getUrl(req)
+                }, {
+                    rel: 'created',
+                    href: util.getUrl(req, filtered.id)
+                }, {
+                    rel: 'author',
+                    href: util.getUrl(req, passageData.owner)
+                }, {
+                    rel: 'passage.from',
+                    href: util.getUrl(req, passageData.from)
+                }, {
+                    rel: 'passage.to',
+                    href: util.getUrl(req, passageData.to)
+                }])
         );
 
     }).catch(function(err) {
@@ -263,8 +284,8 @@ function passagesPost(req, res, next) {
  * Called when a user makes an GET request to "/passage/list/".
  * An admin only list of all passages for all users.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  */
 function passagesList(req, res) {
 
@@ -294,8 +315,8 @@ function passagesList(req, res) {
  * Called when a user makes an GET request to "/passage/:passageId".
  * Gets the details of a specific passage.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
  */
 function passageGet(req, res, next) {
@@ -310,7 +331,19 @@ function passageGet(req, res, next) {
         var filtered = util.dbFilter(
             req.user.permission, 'passage', result, false, false);
         res.json(new SuccessMessage(
-            'Passage found.', filtered));
+            'Passage found.', filtered, [{
+                rel: 'self',
+                href: util.getUrl(req)
+            }, {
+                rel: 'author',
+                href: util.getUrl(req, filtered.owner)
+            }, {
+                rel: 'passage.from',
+                href: util.getUrl(req, filtered.from)
+            }, {
+                rel: 'passage.to',
+                href: util.getUrl(req, filtered.to)
+            }]));
 
     }).catch(function(err) {
         next(err);
@@ -323,8 +356,8 @@ function passageGet(req, res, next) {
  * Called when a user makes an POST request to "/passage/:passageId".
  * Updates a specific passage.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
  */
 function passagePost(req, res, next) {
@@ -495,7 +528,19 @@ function passagePost(req, res, next) {
             newPassageData.owner === req.user._id);
 
         res.json(new SuccessMessage(
-            'Passage has been successfully updated.', filtered));
+            'Passage has been successfully updated.', filtered, [{
+                rel: 'self',
+                href: util.getUrl(req)
+            }, {
+                rel: 'author',
+                href: util.getUrl(req, newPassageData.owner)
+            }, {
+                rel: 'passage.from',
+                href: util.getUrl(req, newPassageData.from)
+            }, {
+                rel: 'passage.to',
+                href: util.getUrl(req, newPassageData.to)
+            }]));
 
     }).catch(function(err) {
         next(err);
@@ -507,8 +552,8 @@ function passagePost(req, res, next) {
  * Called when a user makes an DELETE request to "/passage/:passageId".
  * Deletes a specific passage from the world.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
  */
 function passageDelete(req, res, next) {

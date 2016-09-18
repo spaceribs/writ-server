@@ -94,10 +94,21 @@ describe('Places Endpoint', function() {
                     expect(res.body).toEqual({
                         status : 'SUCCESS',
                         message: 'Owned places found.',
-                        data   : jasmine.any(Array)
+                        data   : jasmine.any(Array),
+                        links  : jasmine.any(Array)
                     });
                     expect(res.body.data[0].owner)
                         .toBe(users.verifiedUser._id);
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch('/place/');
+
+                    expect(res.body.links[1].rel)
+                        .toBe('author');
+                    expect(res.body.links[1].href)
+                        .toMatch(users.verifiedUser.id);
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
@@ -134,7 +145,8 @@ describe('Places Endpoint', function() {
                     expect(res.body).toEqual({
                         status : 'SUCCESS',
                         message: 'Owned places found.',
-                        data   : jasmine.any(Array)
+                        data   : jasmine.any(Array),
+                        links  : jasmine.any(Array)
                     });
                     expect(res.body.data[0].created)
                         .toBeDefined();
@@ -288,8 +300,19 @@ describe('Places Endpoint', function() {
                         message: 'Created new place.',
                         data   : {
                             id: jasmine.any(String)
-                        }
+                        },
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch('/place/');
+
+                    expect(res.body.links[1].rel)
+                        .toBe('created');
+                    expect(res.body.links[1].href)
+                        .toMatch(res.body.data.id);
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
@@ -371,8 +394,19 @@ describe('Places Endpoint', function() {
                             desc: places.lobby.desc,
                             passages: places.lobby.passages,
                             items: places.lobby.items
-                        }
+                        },
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(places.lobby.id);
+
+                    expect(res.body.links[1].rel)
+                        .toBe('author');
+                    expect(res.body.links[1].href)
+                        .toMatch(users.adminUser._id);
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
@@ -391,8 +425,9 @@ describe('Places Endpoint', function() {
                 .expect(function(res) {
                     expect(res.body).toEqual({
                         message: 'Place found.',
-                        status: 'SUCCESS',
-                        data: jasmine.any(Object)
+                        status : 'SUCCESS',
+                        data   : jasmine.any(Object),
+                        links  : jasmine.any(Array)
                     });
                     expect(res.body.data.created)
                         .toBeDefined();
@@ -441,8 +476,19 @@ describe('Places Endpoint', function() {
                     expect(res.body).toEqual({
                         status : 'SUCCESS',
                         message: 'Place has been successfully updated.',
-                        data   : jasmine.any(Object)
+                        data   : jasmine.any(Object),
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(places.northRoom.id);
+
+                    expect(res.body.links[1].rel)
+                        .toBe('author');
+                    expect(res.body.links[1].href)
+                        .toMatch(users.verifiedUser.id);
                 })
                 .expect(200)
                 .end(function(err) {
@@ -510,8 +556,19 @@ describe('Places Endpoint', function() {
                     expect(res.body).toEqual({
                         status : 'SUCCESS',
                         message: 'Place has been successfully updated.',
-                        data   : jasmine.any(Object)
+                        data   : jasmine.any(Object),
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(places.northRoom.id);
+
+                    expect(res.body.links[1].rel)
+                        .toBe('author');
+                    expect(res.body.links[1].href)
+                        .toMatch(places.northRoom.owner);
                 })
                 .expect(200)
                 .end(function(err) {
@@ -595,8 +652,14 @@ describe('Places Endpoint', function() {
                 .expect(function(res) {
                     expect(res.body).toEqual({
                         status : 'SUCCESS',
-                        message: 'Place has been deleted.'
+                        message: 'Place has been deleted.',
+                        links: jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(places.northRoom.id);
                 })
                 .expect(200)
                 .end(function(err) {

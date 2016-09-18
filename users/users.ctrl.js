@@ -91,17 +91,21 @@ function usersGet(req, res) {
         req.user.permission, 'user', req.user, false, true);
 
     res.json(new SuccessMessage(
-        'Your credentials are valid.', filtered));
+        'Your credentials are valid.', filtered, [{
+            rel: 'self',
+            href: util.getUrl(req)
+        }]));
 }
 
 /**
  * Called to create a new user.
  *
  * @param {object} userData - Options for new users.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express response object.
+ * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
  */
-function createUser(userData, res, next) {
+function createUser(userData, req, res, next) {
 
     var validation = tv4.validateMultiple(userData, models.io.user);
 
@@ -158,7 +162,13 @@ function createUser(userData, res, next) {
             'verify your account.', {
                 id   : userData.id,
                 email: userData.email
-            }));
+            }, [{
+                rel: 'self',
+                href: util.getUrl(req)
+            }, {
+                rel: 'created',
+                href: util.getUrl(req, userData._id)
+            }]));
 
     }).catch(function(err) {
         next(err);
@@ -180,9 +190,9 @@ function usersPost(req, res, next) {
         req.user.permission, 'user', req.body, true, true);
 
     if (req.user.anonymous) {
-        createUser(userData, res, next);
+        createUser(userData, req, res, next);
     } else {
-        updateUser(req.user, req.user.id, userData, res, next);
+        updateUser(req.user.id, userData, req, res, next);
     }
 
 }
@@ -229,7 +239,10 @@ function userGet(req, res, next) {
             var filtered = util.dbFilter(
                 req.user.permission, 'user', result, false, false);
             res.json(new SuccessMessage(
-                'User found.', filtered));
+                'User found.', filtered, [{
+                    rel: 'self',
+                    href: util.getUrl(req)
+                }]));
         }).catch(function() {
             next(new errors.UserNotFoundError());
         });
@@ -238,13 +251,13 @@ function userGet(req, res, next) {
 /**
  * Update the specified user by their unique ID.
  *
- * @param {object} editor - The user making changes.
  * @param {string} userId - The user to update.
  * @param {object} userData - The new user data.
+ * @param {Request} req - The user making changes.
  * @param {Response} res - The response call.
  * @param {function} next - The error callback.
  */
-function updateUser(editor, userId, userData, res, next) {
+function updateUser(userId, userData, req, res, next) {
 
     var newUserData;
 
@@ -309,8 +322,8 @@ function updateUser(editor, userId, userData, res, next) {
     })
     .then(function() {
         var userInfo = util.ioFilter(
-            editor.permission, 'user',
-            newUserData, false, editor.id === newUserData.id);
+            req.user.permission, 'user',
+            newUserData, false, req.user.id === newUserData.id);
 
         var message = 'User has been successfully updated.';
 
@@ -319,7 +332,10 @@ function updateUser(editor, userId, userData, res, next) {
                 'email has been sent to the new address.';
         }
 
-        res.json(new SuccessMessage(message, userInfo));
+        res.json(new SuccessMessage(message, userInfo, [{
+            rel: 'self',
+            href: util.getUrl(req)
+        }]));
 
     })
     .catch(function(err) {
@@ -349,7 +365,7 @@ function userPost(req, res, next) {
         userData.permission = 30;
     }
 
-    updateUser(req.user, userId, userData, res, next);
+    updateUser(userId, userData, req, res, next);
 
 }
 
@@ -368,7 +384,11 @@ function userDelete(req, res, next) {
         return Users.remove(doc);
 
     }).then(function() {
-        res.json(new SuccessMessage('User has been deleted.'));
+        res.json(new SuccessMessage(
+            'User has been deleted.', undefined, [{
+                rel: 'self',
+                href: util.getUrl(req)
+            }]));
 
     }).catch(function(err) {
         next({
@@ -423,8 +443,14 @@ function userVerify(req, res, next) {
             );
         }
 
-    }).then(function() {
-        res.json(new SuccessMessage('Your email has been verified.'));
+    }).then(function(user) {
+        res.json(new SuccessMessage('Your email has been verified.', undefined, [{
+            rel: 'self',
+            href: util.getUrl(req)
+        }, {
+            rel: 'verified',
+            href: util.getUrl(req, user.id)
+        }]));
 
     }).catch(function(err) {
         next(err);

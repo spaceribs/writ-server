@@ -4,3 +4,4 @@ db/*
 !db/index.js
 coverage
 /server/config.json
+config.json

@@ -19,8 +19,8 @@ for (var i = 0; i < models.refs.length; i++) {
  * Called when a user makes an OPTIONS request to "/places/".
  * Returns the json-schema used to validate/update places.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
  */
 function placesOptions(req, res, next) {
@@ -35,8 +35,8 @@ function placesOptions(req, res, next) {
  * Called when a user makes an GET request to "/place/".
  * Returns the authenticated users' owned places.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
  */
 function placesGet(req, res, next) {
@@ -75,7 +75,13 @@ function placesGet(req, res, next) {
     }).then(function(places) {
         res.json(new SuccessMessage(
             'Owned places found.',
-            places)
+            places, [{
+                rel: 'self',
+                href: util.getUrl(req)
+            }, {
+                rel: 'author',
+                href: util.getUrl(req, req.user._id)
+            }])
         );
 
     }).catch(function(err) {
@@ -89,8 +95,8 @@ function placesGet(req, res, next) {
  * Called when a user makes an POST request to "/place/".
  * Creates a new place for the current user.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
  */
 function placesPost(req, res, next) {
@@ -185,7 +191,16 @@ function placesPost(req, res, next) {
 
         res.json(
             new SuccessMessage(
-                'Created new place.', filtered)
+                'Created new place.', filtered, [{
+                    rel: 'self',
+                    href: util.getUrl(req)
+                }, {
+                    rel: 'created',
+                    href: util.getUrl(req, filtered.id)
+                }, {
+                    rel: 'author',
+                    href: util.getUrl(req, placeData.owner)
+                }])
         );
 
     }).catch(function(err) {
@@ -201,8 +216,8 @@ function placesPost(req, res, next) {
  * Called when a user makes an GET request to "/place/list/".
  * An admin only list of all places for all users.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  */
 function placesList(req, res) {
 
@@ -229,8 +244,8 @@ function placesList(req, res) {
  * Called when a user makes an GET request to "/place/:placeId".
  * Gets the details of a specific place.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
  */
 function placeGet(req, res, next) {
@@ -241,7 +256,13 @@ function placeGet(req, res, next) {
             var filtered = util.dbFilter(
                 req.user.permission, 'place', result, false, false);
             res.json(new SuccessMessage(
-                'Place found.', filtered));
+                'Place found.', filtered, [{
+                    rel: 'self',
+                    href: util.getUrl(req)
+                }, {
+                    rel: 'author',
+                    href: util.getUrl(req, filtered.owner)
+                }]));
 
         }).catch(function() {
             next(new errors.PlaceNotFoundError());
@@ -292,8 +313,14 @@ function placePost(req, res, next) {
                 req.user.permission, 'place',
                 newPlaceData, false, req.user._id === newPlaceData.owner);
 
-            res.json(new SuccessMessage('Place has been successfully updated.',
-                placeData));
+            res.json(new SuccessMessage(
+                'Place has been successfully updated.', placeData, [{
+                    rel: 'self',
+                    href: util.getUrl(req)
+                }, {
+                    rel: 'author',
+                    href: util.getUrl(req, placeData.owner)
+                }]));
 
         }).catch(function(err) {
             if (err.status === 404) {
@@ -310,8 +337,8 @@ function placePost(req, res, next) {
  * Called when a user makes an DELETE request to "/place/:placeId".
  * Deletes a specific place from the world.
  *
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
  */
 function placeDelete(req, res, next) {
@@ -322,7 +349,11 @@ function placeDelete(req, res, next) {
         return Places.remove(doc);
 
     }).then(function() {
-        res.json(new SuccessMessage('Place has been deleted.'));
+        res.json(new SuccessMessage(
+            'Place has been deleted.', undefined, [{
+                rel: 'self',
+                href: util.getUrl(req)
+            }]));
 
     }).catch(function() {
         next(new errors.PlaceNotFoundError());

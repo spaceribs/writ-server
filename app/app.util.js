@@ -3,6 +3,21 @@
 var secureRandom = require('secure-random');
 var hmac = require('crypto-js/hmac-sha512');
 var models = require('../models');
+var config = require('../config.json');
+
+/**
+ * Reconstruct a path to a resource, used for HATEAOS.
+ *
+ * @param {Request} req - Express request object.
+ * @param {=string} path - Path to construct.
+ * @returns {string}
+ */
+function getUrl(req, path) {
+    var url = req.protocol + '://';
+    url += req.get('host');
+    url += path ? ('/' + path) : req.originalUrl;
+    return url;
+}
 
 /**
  * Transforms a request body password to a salt/hash.
@@ -138,5 +153,6 @@ module.exports = {
     userCan        : userCan,
     ioFilter       : ioFilter,
     dbFilter       : dbFilter,
-    tokenEmail     : tokenEmail
+    tokenEmail     : tokenEmail,
+    getUrl         : getUrl
 };

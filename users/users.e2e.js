@@ -111,8 +111,17 @@ describe('Users Endpoint', function() {
                         data   : {
                             id   : jasmine.any(String),
                             email: newUser.email
-                        }
+                        },
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch('/user/');
+
+                    expect(res.body.links[1].rel)
+                        .toBe('created');
                 })
                 .expect(200)
                 .expect(function() {
@@ -135,8 +144,14 @@ describe('Users Endpoint', function() {
                             email     : verifiedUser.email,
                             name      : newUser.name,
                             permission: 20
-                        }
+                        },
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch('/user/');
                 })
                 .expect(200)
                 .end(function() {
@@ -145,13 +160,19 @@ describe('Users Endpoint', function() {
                         .expect(function(res) {
                             expect(res.body).toEqual({
                                 message: 'User found.',
-                                status: 'SUCCESS',
-                                data: {
+                                status : 'SUCCESS',
+                                data   : {
                                     id: verifiedUser.id,
                                     name: newUser.name,
                                     permission: 20
-                                }
+                                },
+                                links  : jasmine.any(Array)
                             });
+
+                            expect(res.body.links[0].rel)
+                                .toBe('self');
+                            expect(res.body.links[0].href)
+                                .toMatch(verifiedUser.id);
                         })
                         .expect(200)
                         .end(util.handleSupertest(done));
@@ -178,8 +199,14 @@ describe('Users Endpoint', function() {
                             email     : newUser.email,
                             name      : verifiedUser.name,
                             permission: 30
-                        }
+                        },
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch('/user/');
                 })
                 .expect(200)
                 .expect(function() {
@@ -198,8 +225,14 @@ describe('Users Endpoint', function() {
                                     email: newUser.email,
                                     name: verifiedUser.name,
                                     permission: 30
-                                }
+                                },
+                                links  : jasmine.any(Array)
                             });
+
+                            expect(res.body.links[0].rel)
+                                .toBe('self');
+                            expect(res.body.links[0].href)
+                                .toMatch(verifiedUser.id);
                         })
                         .expect(200)
                         .end(util.handleSupertest(done));
@@ -234,8 +267,19 @@ describe('Users Endpoint', function() {
                 .expect(function(res) {
                     expect(res.body).toEqual({
                         status : 'SUCCESS',
-                        message: 'Your email has been verified.'
+                        message: 'Your email has been verified.',
+                        links: jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(unverifiedUser.secret);
+
+                    expect(res.body.links[1].rel)
+                        .toBe('verified');
+                    expect(res.body.links[1].href)
+                        .toMatch(unverifiedUser.id);
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
@@ -284,8 +328,14 @@ describe('Users Endpoint', function() {
                             name      : verifiedUser.name,
                             id        : verifiedUser.id,
                             permission: 20
-                        }
+                        },
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch('/user/');
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
@@ -307,8 +357,14 @@ describe('Users Endpoint', function() {
                             name      : adminUser.name,
                             id        : adminUser.id,
                             permission: 10
-                        }
+                        },
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch('/user/');
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
@@ -381,8 +437,14 @@ describe('Users Endpoint', function() {
                             'id'        : verifiedUser.id,
                             'name'      : verifiedUser.name,
                             'permission': verifiedUser.permission
-                        }
+                        },
+                        links: jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(verifiedUser.id);
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
@@ -404,8 +466,14 @@ describe('Users Endpoint', function() {
                             'email'     : verifiedUser.email,
                             'name'      : verifiedUser.name,
                             'permission': verifiedUser.permission
-                        }
+                        },
+                        links: jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(verifiedUser.id);
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
@@ -484,8 +552,14 @@ describe('Users Endpoint', function() {
                             email     : verifiedUser.email,
                             name      : 'Good Name',
                             permission: 20
-                        }
+                        },
+                        links: jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(verifiedUser.id);
                 })
                 .expect(200)
                 .end(function(err) {
@@ -521,8 +595,14 @@ describe('Users Endpoint', function() {
                             email     : 'test@test.com',
                             name      : verifiedUser.name,
                             permission: 30
-                        }
+                        },
+                        links: jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(verifiedUser.id);
                 })
                 .expect(200)
                 .end(function(err) {
@@ -600,8 +680,14 @@ describe('Users Endpoint', function() {
                 .expect(function(res) {
                     expect(res.body).toEqual({
                         status : 'SUCCESS',
-                        message: 'User has been deleted.'
+                        message: 'User has been deleted.',
+                        links  : jasmine.any(Array)
                     });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(unverifiedUser.id);
                 })
                 .expect(200)
                 .end(function() {

@@ -45,7 +45,10 @@ describe('Passages', function() {
 
             req = {
                 user: anonymousUser,
-                accepts: jasmine.createSpy('accepts')
+                accepts: jasmine.createSpy('accepts'),
+                get: function() {
+                    return 'localhost:1234';
+                }
             };
 
             res = {
