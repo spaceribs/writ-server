@@ -5,6 +5,7 @@ var passport = require('../users/users.auth');
 var bodyParser = require('body-parser');
 var app = express();
 var successes = require('./app.successes');
+var util = require('./app.util');
 
 app.use(bodyParser.json());
 app.use(passport.initialize());
@@ -14,18 +15,24 @@ app.get('/', function(req, res) {
     var config = require('../config.json');
 
     res.json(
-        new successes.SuccessMessage('Hello World!', null, null, [
+        new successes.SuccessMessage('Welcome to Writ.', {
+            lobby: util.getUrl(req, config.lobby)
+        }, [
+            {
+                rel: 'self',
+                href: util.getUrl(req)
+            },
             {
                 rel: 'users',
-                href: config.hostname + '/user/'
+                href: util.getUrl(req, 'user/')
             },
             {
                 rel: 'places',
-                href: config.hostname + '/place/'
+                href: util.getUrl(req, 'place/')
             },
             {
                 rel: 'passages',
-                href: config.hostname + '/passage/'
+                href: util.getUrl(req, 'passage/')
             }
         ])
     );
