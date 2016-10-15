@@ -4,6 +4,8 @@ var Jasmine = require('jasmine');
 var SpecReporter = require('jasmine-spec-reporter');
 var framework = new Jasmine();
 
+framework.env.clearReporters();
+
 framework.addReporter(new SpecReporter({
     displayStacktrace: 'all',
     displayPendingSpec: true,
