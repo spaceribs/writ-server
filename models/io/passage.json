@@ -6,7 +6,7 @@
     "properties": {
         "name": {
             "type": "string",
-            "minLength": 3,
+            "minLength": 2,
             "maxLength": 128,
             "faker": "lorem.sentence",
             "permission": {
@@ -17,7 +17,7 @@
         },
         "desc": {
             "type": "string",
-            "minLength": 3,
+            "minLength": 2,
             "maxLength": 2048,
             "faker": "lorem.paragraph",
             "permission": {
