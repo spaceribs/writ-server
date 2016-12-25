@@ -4,39 +4,13 @@ var express = require('express');
 var passport = require('../users/users.auth');
 var bodyParser = require('body-parser');
 var app = express();
-var successes = require('./app.successes');
-var util = require('./app.util');
+var ctrl = require('./app.ctrl');
 
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('/', function(req, res) {
-    var config = require('../config.json');
-
-    res.json(
-        new successes.SuccessMessage('Welcome to Writ.', {
-            lobby: util.getUrl(req, config.lobby)
-        }, [
-            {
-                rel: 'self',
-                href: util.getUrl(req)
-            },
-            {
-                rel: 'users',
-                href: util.getUrl(req, 'user/')
-            },
-            {
-                rel: 'places',
-                href: util.getUrl(req, 'place/')
-            },
-            {
-                rel: 'passages',
-                href: util.getUrl(req, 'passage/')
-            }
-        ])
-    );
-});
+app.get('/', ctrl.get);
 
 app.use(require('../users/users.router'));
 app.use(require('../places/places.router'));

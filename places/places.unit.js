@@ -9,12 +9,14 @@ var SuccessMessage = require('../app/app.successes').SuccessMessage;
 
 var Users = require('../users/users.db.mock');
 var Places = require('../places/places.db.mock');
+var Passages = require('../passages/passages.db.mock');
 
 describe('Places', function() {
 
     var newPlace;
     var users;
     var places;
+    var passages;
     var ctrl;
 
     var req;
@@ -84,9 +86,23 @@ describe('Places', function() {
                 .then(function(mockUsers) {
                     users = mockUsers;
                     return Places.mockPlaces(users);
-                }).then(function(mockPlaces) {
+                })
+                .then(function(mockPlaces) {
                     places = mockPlaces;
-                }).then(done);
+                    return Passages.mockPassages(places);
+                })
+                .then(function(mockPassages) {
+                    passages = mockPassages;
+                })
+                .then(done)
+            /*eslint-disable */
+                .catch(
+            /* istanbul ignore next */
+                function(err) {
+                    console.error(err.stack);
+                });
+            /*eslint-enable */
+
 
         }
     );
@@ -516,6 +532,54 @@ describe('Places', function() {
                     callback.and.callFake(function(err) {
                         expect(err)
                             .toEqual(jasmine.any(errors.PlaceNotFoundError));
+                        done();
+                    });
+                });
+        });
+
+        describe('placePassagesGet()', function() {
+            it('gets the details of a specific place.',
+                function(done) {
+                    req.params = {
+                        placeId: places.lobby.id
+                    };
+                    ctrl.place.passages.get(req, res, callback);
+
+                    res.json.and.callFake(function(response) {
+                        expect(response)
+                            .toEqual(jasmine.any(SuccessMessage));
+                        expect(response.data.created).toBeUndefined();
+                        done();
+                    });
+                });
+
+            it('doesn\'t return anything if the place doesn\'t exist.',
+                function(done) {
+                    req.params = {
+                        placeId: uuid.v4()
+                    };
+                    ctrl.place.passages.get(req, res, callback);
+
+                    callback.and.callFake(function(response) {
+                        expect(response)
+                            .toEqual(jasmine.any(errors.PlaceNotFoundError));
+                        done();
+                    });
+
+                });
+
+            it('gets more information if you are an admin.',
+                function(done) {
+                    req.user = users.adminUser;
+                    req.params = {
+                        placeId: places.lobby.id
+                    };
+                    ctrl.place.passages.get(req, res, callback);
+
+                    res.json.and.callFake(function(response) {
+                        expect(response)
+                            .toEqual(jasmine.any(SuccessMessage));
+                        expect(response.data.from[0].created).toBeDefined();
                         done();
                     });
                 });

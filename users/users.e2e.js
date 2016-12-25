@@ -490,10 +490,7 @@ describe('Users Endpoint', function() {
                 .post('/user/' + unverifiedUser.id)
                 .send({name: 'Bad Name'})
                 .expect(401)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                    }
+                .end(function() {
 
                     supertest(app).get('/user/' + unverifiedUser.id)
                         .expect('Content-Type', /json/)
@@ -520,11 +517,7 @@ describe('Users Endpoint', function() {
                         'access this endpoint.'
                     });
                 })
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app).get('/user/' + unverifiedUser.id)
                         .expect('Content-Type', /json/)
@@ -562,11 +555,7 @@ describe('Users Endpoint', function() {
                         .toMatch(verifiedUser.id);
                 })
                 .expect(200)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app).get('/user/' + verifiedUser.id)
                         .expect('Content-Type', /json/)
@@ -605,11 +594,7 @@ describe('Users Endpoint', function() {
                         .toMatch(verifiedUser.id);
                 })
                 .expect(200)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app).get('/user/' + verifiedUser.id)
                         .auth(adminUser.email, adminUser.password)
@@ -632,11 +617,7 @@ describe('Users Endpoint', function() {
             supertest(app)
                 .delete('/user/' + verifiedUser.id)
                 .expect(401)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app).get('/user/' + verifiedUser.id)
                         .expect('Content-Type', /json/)
@@ -658,11 +639,7 @@ describe('Users Endpoint', function() {
                         'access this endpoint.'
                     });
                 })
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app).get('/user/' + verifiedUser.id)
                         .expect('Content-Type', /json/)

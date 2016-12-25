@@ -8,12 +8,14 @@ var util = require('../test/util');
 
 var Users = require('../users/users.db.mock');
 var Places = require('../places/places.db.mock');
+var Passages = require('../passages/passages.db.mock');
 
 describe('Places Endpoint', function() {
 
     var app;
     var newPlace;
     var places;
+    var passages;
     var users;
 
     beforeAll(mocks.enable);
@@ -37,9 +39,23 @@ describe('Places Endpoint', function() {
                 .then(function(mockUsers) {
                     users = mockUsers;
                     return Places.mockPlaces(users);
-                }).then(function(mockPlaces) {
+                })
+                .then(function(mockPlaces) {
                     places = mockPlaces;
-                }).then(done);
+                    return Passages.mockPassages(places);
+                })
+                .then(function(mockPassages) {
+                    passages = mockPassages;
+                })
+                .then(done)
+            /*eslint-disable */
+                .catch(
+            /* istanbul ignore next */
+                function(err) {
+                    console.error(err.stack);
+                });
+            /*eslint-enable */
+
 
         }
     );
@@ -447,10 +463,7 @@ describe('Places Endpoint', function() {
                 .post('/place/' + places.northRoom.id)
                 .send({name: 'Bad Name'})
                 .expect(401)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                    }
+                .end(function() {
 
                     supertest(app).get('/place/' + places.northRoom.id)
                         .expect('Content-Type', /json/)
@@ -491,10 +504,7 @@ describe('Places Endpoint', function() {
                         .toMatch(users.verifiedUser.id);
                 })
                 .expect(200)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                    }
+                .end(function() {
 
                     supertest(app).get('/place/' + places.northRoom.id)
                         .expect('Content-Type', /json/)
@@ -524,11 +534,7 @@ describe('Places Endpoint', function() {
                         'updates to the room.'
                     });
                 })
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app)
                         .get('/place/' + places.lobby.id)
@@ -571,11 +577,7 @@ describe('Places Endpoint', function() {
                         .toMatch(places.northRoom.owner);
                 })
                 .expect(200)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app)
                         .get('/place/' + places.northRoom.id)
@@ -598,11 +600,7 @@ describe('Places Endpoint', function() {
             supertest(app)
                 .delete('/place/' + places.northRoom.id)
                 .expect(401)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app).get('/place/' + places.northRoom.id)
                         .expect('Content-Type', /json/)
@@ -627,11 +625,7 @@ describe('Places Endpoint', function() {
                         'access this endpoint.'
                     });
                 })
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app).get('/place/' + places.lobby.id)
                         .expect('Content-Type', /json/)
@@ -662,11 +656,7 @@ describe('Places Endpoint', function() {
                         .toMatch(places.northRoom.id);
                 })
                 .expect(200)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app).get('/place/' + places.northRoom.id)
                         .expect('Content-Type', /json/)
@@ -674,6 +664,61 @@ describe('Places Endpoint', function() {
                         .end(util.handleSupertest(done));
 
                 });
+
+        });
+
+    });
+
+    describe('"/place/:placeId/passage" GET', function() {
+
+        it('should return basic information if ' +
+            'you are not authenticated.', function(done) {
+            supertest(app)
+                .get('/place/' + places.lobby.id + '/passage')
+                .expect('Content-Type', /json/)
+                .expect(function(res) {
+                    expect(res.body).toEqual({
+                        message: 'Place passages found.',
+                        status : 'SUCCESS',
+                        data   : {
+                            from: jasmine.any(Array),
+                            to: jasmine.any(Array)
+                        },
+                        links  : jasmine.any(Array)
+                    });
+
+                    expect(res.body.links[0].rel)
+                        .toBe('self');
+                    expect(res.body.links[0].href)
+                        .toMatch(places.lobby.id);
+                    expect(res.body.links[0].href)
+                        .toMatch('/passage');
+
+                    expect(res.body.links[1].rel)
+                        .toBe('place');
+                    expect(res.body.links[1].href)
+                        .toMatch(places.lobby.id);
+                })
+                .expect(200)
+                .end(util.handleSupertest(done));
+
+        });
+
+        it('should return more information if ' +
+            'you are authenticated as an admin.', function(done) {
+            supertest(app)
+                .get('/place/' + places.lobby.id + '/passage')
+                .auth(
+                    users.adminUser.email,
+                    users.adminUser.password
+                )
+                .expect('Content-Type', /json/)
+                .expect(function(res) {
+                    expect(res.body.data.from[0].created)
+                        .toBeDefined();
+                })
+                .expect(200)
+                .end(util.handleSupertest(done));
 
         });
 

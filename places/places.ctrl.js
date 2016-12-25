@@ -7,9 +7,11 @@ var tv4 = require('tv4');
 
 var models = require('../models');
 var Places = require('../places/places.db');
+var Passages = require('../passages/passages.db');
 var errors = require('../app/app.errors');
 var SuccessMessage = require('../app/app.successes').SuccessMessage;
 var util = require('../app/app.util');
+var databaseErrorHandler = require('../app/app.db.handler.js');
 
 for (var i = 0; i < models.refs.length; i++) {
     tv4.addSchema(models.refs[i]);
@@ -98,6 +100,7 @@ function placesGet(req, res, next) {
  * @param {Request} req - Express request object.
  * @param {Response} res - Express response object.
  * @param {function} next - Callback for the response.
+ * @returns {boolean|null} - Returns false if validation failed.
  */
 function placesPost(req, res, next) {
 
@@ -250,18 +253,23 @@ function placesList(req, res) {
  */
 function placeGet(req, res, next) {
 
-    var placeId = req.params.placeId;
-    Places.get('place/' + placeId)
+    var placeId = 'place/' + req.params.placeId;
+
+    Places.get(placeId)
         .then(function(result) {
-            var filtered = util.dbFilter(
+
+            return util.dbFilter(
                 req.user.permission, 'place', result, false, false);
+
+        }).then(function(place) {
+
             res.json(new SuccessMessage(
-                'Place found.', filtered, [{
+                'Place found.', place, [{
                     rel: 'self',
                     href: util.getUrl(req)
                 }, {
                     rel: 'author',
-                    href: util.getUrl(req, filtered.owner)
+                    href: util.getUrl(req, place.owner)
                 }]));
 
         }).catch(function() {
@@ -281,9 +289,9 @@ function placeGet(req, res, next) {
 function placePost(req, res, next) {
 
     var newPlaceData;
-    var placeId = req.params.placeId;
+    var placeId = 'place/' + req.params.placeId;
 
-    Places.get('place/' + placeId)
+    Places.get(placeId)
         .then(function(result) {
             var placeUpdates = util.ioFilter(
                 req.user.permission, 'place', req.body, true,
@@ -343,9 +351,9 @@ function placePost(req, res, next) {
  */
 function placeDelete(req, res, next) {
 
-    var placeId = req.params.placeId;
+    var placeId = 'place/' + req.params.placeId;
 
-    Places.get('place/' + placeId).then(function(doc) {
+    Places.get(placeId).then(function(doc) {
         return Places.remove(doc);
 
     }).then(function() {
@@ -362,6 +370,81 @@ function placeDelete(req, res, next) {
 
 }
 
+/**
+ * Called when a user makes an GET request to "/place/:placeId/passage/".
+ * Gets all passages connected to a place.
+ *
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
+ * @param {function} next - Callback for the response.
+ */
+function placePassagesGet(req, res, next) {
+
+    var placeId = 'place/' + req.params.placeId;
+
+    Places.get(placeId)
+        .then(function() {
+
+            var fromIndex = Passages.createIndex({
+                'index': {
+                    'fields': ['from']
+                }
+            }).catch(databaseErrorHandler('passages'));
+
+            var toIndex = Passages.createIndex({
+                'index': {
+                    'fields': ['to']
+                }
+            }).catch(databaseErrorHandler('passages'));
+
+            return Promise.all([
+                fromIndex,
+                toIndex
+            ]);
+
+        }).then(function() {
+
+            var fromPassages = Passages.find({
+                selector: {'from': placeId}
+            }).catch(databaseErrorHandler('passage'));
+
+            var toPassages = Passages.find({
+                selector: {'from': placeId}
+            }).catch(databaseErrorHandler('passage'));
+
+            return Promise.all([
+                fromPassages,
+                toPassages
+            ]);
+
+        }).then(function(passageCollections) {
+            var filtered = _.map(passageCollections, function(passages) {
+                return _.map(passages.docs, function(passage) {
+                    return util.dbFilter(req.user.permission, 'passage', passage, false, false);
+                });
+            });
+
+            res.json(
+                new SuccessMessage(
+                    'Place passages found.', {
+                        from: filtered[0],
+                        to: filtered[1]
+                    }, [{
+                        rel: 'self',
+                        href: util.getUrl(req)
+                    }, {
+                        rel: 'place',
+                        href: util.getUrl(req, placeId)
+                    }])
+            );
+
+        }).catch(function() {
+            next(new errors.PlaceNotFoundError());
+
+        });
+
+}
+
 module.exports = {
     places   : {
         options: placesOptions,
@@ -370,8 +453,11 @@ module.exports = {
         list   : placesList
     },
     place    : {
-        get   : placeGet,
-        post  : placePost,
-        delete: placeDelete
+        get     : placeGet,
+        post    : placePost,
+        delete  : placeDelete,
+        passages: {
+            get: placePassagesGet
+        }
     }
 };

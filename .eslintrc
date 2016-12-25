@@ -31,7 +31,7 @@
                 "return": "returns",
                 "virtual": "abstract"
             },
-            "requireReturn": true,
+            "requireReturn": false,
             "requireReturnType": true,
             "requireParamDescription": true,
             "requireReturnDescription": true

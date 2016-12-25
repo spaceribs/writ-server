@@ -37,4 +37,9 @@ router.route('/place/:placeId')
         restrict(roles.admin),
         controller.place.delete);
 
+router.route('/place/:placeId/passage')
+    .get(passport.authenticate(['basic', 'anonymous'], authOptions),
+        restrict(roles.anonymous),
+        controller.place.passages.get);
+
 module.exports = router;

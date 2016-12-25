@@ -1,21 +1,72 @@
 'use strict';
 
 var jsf = require('json-schema-faker');
+var successes = require('./app.successes');
 var models = require('../models');
 var _ = require('lodash');
 
 describe('App Unit Tests', function() {
 
+    var ctrl;
     var util;
     var database;
     var errors;
     var newUser;
 
+    var req;
+    var res;
+    var callback;
+
+    var anonymousUser = {
+        name: 'Anonymous User',
+        permission: 100,
+        anonymous: true
+    };
+
     beforeAll(function() {
+        ctrl = require('./app.ctrl');
         util = require('./app.util');
         database = require('./app.db.handler.js');
         errors = require('./app.errors');
     });
+
+    beforeEach(
+        /**
+         * Initialize request, response and callbacks for the Express
+         * controllers we'll be testing.
+         */
+        function expressSetup() {
+
+            req = {
+                user: anonymousUser,
+                accepts: jasmine.createSpy('accepts'),
+                protocol: 'http',
+                originalUrl: '/',
+                get: function() {
+                    return 'localhost:1234';
+                }
+            };
+
+            res = {
+                json: jasmine.createSpy('json')
+            };
+
+            callback = jasmine.createSpy('callback');
+
+            /*eslint-disable */
+            /* istanbul ignore next */
+            res.json.and.callFake(function(response) {
+                console.error('UNEXPECTED RESPONSE: \n', response);
+            });
+
+            /* istanbul ignore next */
+            callback.and.callFake(function(err) {
+                console.error('UNEXPECTED ERROR: \n', err);
+            });
+            /*eslint-enable */
+
+        }
+    );
 
     beforeEach(
         /**
@@ -26,6 +77,33 @@ describe('App Unit Tests', function() {
             newUser = jsf(models.io.user, models.refs);
         }
     );
+
+
+    describe('Controller', function() {
+        it('returns a welcome message and links to available collections.',
+            function() {
+                res.json.and.callFake(function(response) {
+                    expect(response)
+                        .toEqual(jasmine.any(successes.SuccessMessage));
+                    expect(response.status)
+                        .toBe('SUCCESS');
+
+                    expect(response.links[0].rel)
+                        .toBe('self');
+                    expect(response.links[1].rel)
+                        .toBe('users');
+                    expect(response.links[2].rel)
+                        .toBe('places');
+                    expect(response.links[3].rel)
+                        .toBe('passages');
+
+                    expect(response.links.length)
+                        .toBe(4);
+                });
+
+                ctrl.get(req, res, callback);
+            });
+    });
 
     describe('Database Error Handler', function() {
 

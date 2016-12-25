@@ -49,8 +49,9 @@ describe('Passages Endpoint', function() {
                 })
                 .then(done)
             /*eslint-disable */
+                .catch(
             /* istanbul ignore next */
-                .catch(function(err) {
+                function(err) {
                     console.error(err.stack);
                 });
             /*eslint-enable */
@@ -69,8 +70,9 @@ describe('Passages Endpoint', function() {
             })
             .then(done)
         /*eslint-disable */
+            .catch(
         /* istanbul ignore next */
-            .catch(function(err) {
+            function(err) {
                 console.error(err.stack);
             });
         /*eslint-enable */
@@ -534,10 +536,7 @@ describe('Passages Endpoint', function() {
                 .post('/passage/' + passages.northDoor.id)
                 .send({name: 'Bad Name'})
                 .expect(401)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                    }
+                .end(function() {
 
                     supertest(app).get('/passage/' + passages.northDoor.id)
                         .expect('Content-Type', /json/)
@@ -585,10 +584,7 @@ describe('Passages Endpoint', function() {
                         .toMatch(passages.farNorthDoor.to);
                 })
                 .expect(200)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                    }
+                .end(function() {
 
                     supertest(app).get('/passage/' + passages.farNorthDoor.id)
                         .expect('Content-Type', /json/)
@@ -618,11 +614,7 @@ describe('Passages Endpoint', function() {
                         'these updates to this passage.'
                     });
                 })
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app)
                         .get('/passage/' + passages.northDoor.id)
@@ -675,11 +667,7 @@ describe('Passages Endpoint', function() {
                         .toMatch(passages.northEastDoor.to);
                 })
                 .expect(200)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app)
                         .get('/passage/' + passages.northEastDoor.id)
@@ -702,11 +690,7 @@ describe('Passages Endpoint', function() {
             supertest(app)
                 .delete('/passage/' + passages.northEastDoor.id)
                 .expect(401)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app).get('/passage/' + passages.northEastDoor.id)
                         .expect('Content-Type', /json/)
@@ -731,11 +715,7 @@ describe('Passages Endpoint', function() {
                         'to access this endpoint.'
                     });
                 })
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app).get('/passage/' + passages.northEastDoor.id)
                         .expect('Content-Type', /json/)
@@ -761,11 +741,7 @@ describe('Passages Endpoint', function() {
                     });
                 })
                 .expect(200)
-                .end(function(err) {
-                    if (err) {
-                        done.fail(err);
-                        return false;
-                    }
+                .end(function() {
 
                     supertest(app).get('/passage/' + passages.northEastDoor.id)
                         .expect('Content-Type', /json/)
