@@ -113,36 +113,6 @@
                 "write": 10,
                 "owner": true
             }
-        },
-        "passages": {
-            "description": "Passages connecting this place to other places.",
-            "type": "object",
-            "minProperties": 2,
-            "properties": {
-                "north": {
-                    "$ref": "/writ/db/passage/id"
-                },
-                "east": {
-                    "$ref": "/writ/db/passage/id"
-                },
-                "south": {
-                    "$ref": "/writ/db/passage/id"
-                },
-                "west": {
-                    "$ref": "/writ/db/passage/id"
-                },
-                "up": {
-                    "$ref": "/writ/db/passage/id"
-                },
-                "down": {
-                    "$ref": "/writ/db/passage/id"
-                }
-            },
-            "permission": {
-                "read": 100,
-                "write": 10,
-                "owner": true
-            }
         }
     },
     "required": [
@@ -154,7 +124,6 @@
         "name",
         "desc",
         "pos",
-        "passages",
         "items"
     ]
 }

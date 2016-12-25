@@ -270,6 +270,9 @@ function placeGet(req, res, next) {
                 }, {
                     rel: 'author',
                     href: util.getUrl(req, place.owner)
+                }, {
+                    rel: 'passages',
+                    href: util.getUrl(req, placeId + '/passages')
                 }]));
 
         }).catch(function() {

@@ -198,7 +198,7 @@ describe('Places Endpoint', function() {
                         status: 'SCHEMA_INVALID',
                         errors: jasmine.any(Object)
                     });
-                    expect(res.body.errors.body.length).toBe(5);
+                    expect(res.body.errors.body.length).toBe(4);
                 })
                 .expect('Content-Type', /json/)
                 .expect(400)
@@ -221,7 +221,7 @@ describe('Places Endpoint', function() {
                         status: 'SCHEMA_INVALID',
                         errors: jasmine.any(Object)
                     });
-                    expect(res.body.errors.body.length).toBe(5);
+                    expect(res.body.errors.body.length).toBe(4);
                 })
                 .end(util.handleSupertest(done));
         });
@@ -408,7 +408,6 @@ describe('Places Endpoint', function() {
                             name: places.lobby.name,
                             pos: places.lobby.pos,
                             desc: places.lobby.desc,
-                            passages: places.lobby.passages,
                             items: places.lobby.items
                         },
                         links  : jasmine.any(Array)
@@ -423,6 +422,13 @@ describe('Places Endpoint', function() {
                         .toBe('author');
                     expect(res.body.links[1].href)
                         .toMatch(users.adminUser._id);
+
+                    expect(res.body.links[2].rel)
+                        .toBe('passages');
+                    expect(res.body.links[2].href)
+                        .toMatch(places.lobby.id);
+                    expect(res.body.links[2].href)
+                        .toMatch('/passages');
                 })
                 .expect(200)
                 .end(util.handleSupertest(done));
