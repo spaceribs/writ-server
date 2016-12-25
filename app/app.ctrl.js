@@ -11,12 +11,8 @@ var util = require('./app.util');
  * @param {Response} res - Express response object.
  */
 function appsGet(req, res) {
-    var config = require('../config.json');
-
     res.json(
-        new successes.SuccessMessage('Welcome to Writ.', {
-            lobby: util.getUrl(req, config.lobby)
-        }, [
+        new successes.SuccessMessage('Welcome to Writ.', null, [
             {
                 rel: 'self',
                 href: util.getUrl(req)
